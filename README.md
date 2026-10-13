@@ -7,7 +7,7 @@ SDG 8 – Decent Work & Economic Growth · Level L2 · Dataset: UCI Online Retai
 Segments e-commerce customers by **Recency, Frequency, Monetary (RFM)** behaviour so a retailer can target
 champions, win back at-risk buyers and stop spending marketing money on lost ones.
 
-[![pipeline](../../actions/workflows/main.yml/badge.svg)](../../actions)
+[![pipeline](https://github.com/chittrasan80-commits/Big-data-analytics/actions/workflows/main.yml/badge.svg)](https://github.com/chittrasan80-commits/Big-data-analytics/actions)
 
 ## Syllabus / tools mapping
 
