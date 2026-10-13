@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+spark-warehouse/
+metastore_db/
+derby.log
+data/online_retail.csv
+data/*.xlsx
+.venv/

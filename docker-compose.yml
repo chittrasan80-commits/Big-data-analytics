@@ -1,0 +1,8 @@
+services:
+  cassandra:
+    image: cassandra:4.1
+    ports: ["9042:9042"]
+    environment:
+      - CASSANDRA_CLUSTER_NAME=retail
+      - MAX_HEAP_SIZE=512M
+      - HEAP_NEWSIZE=128M
