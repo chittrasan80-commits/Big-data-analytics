@@ -1,0 +1,41 @@
+name: pipeline
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install "pyspark>=3.5,<4" "pandas<3" numpy matplotlib
+      - name: Generate sample data
+        run: python generate_sample_data.py --out online_retail_sample.csv
+      - name: MapReduce RFM (Hadoop Streaming, local simulation)
+        run: |
+          mkdir -p outputs
+          bash run_local.sh online_retail_sample.csv outputs/rfm_mapreduce.csv
+      - name: PySpark segmentation
+        run: python segmentation_pyspark.py --input online_retail_sample.csv --out outputs
+      - name: Charts
+        run: python visualize.py --out outputs
+      - name: Verify MapReduce and Spark RFM agree
+        run: |
+          python - <<'PY'
+          import pandas as pd
+          a = pd.read_csv("outputs/rfm_mapreduce.csv").set_index("CustomerID")
+          b = pd.read_csv("outputs/customer_segments.csv").set_index("CustomerID")[["Recency","Frequency","Monetary"]]
+          j = a.join(b, lsuffix="_mr", rsuffix="_sp")
+          assert (j.Recency_mr == j.Recency_sp).all()
+          assert (j.Frequency_mr == j.Frequency_sp).all()
+          assert ((j.Monetary_mr - j.Monetary_sp).abs() < 0.05).all()
+          print("MapReduce and PySpark RFM match for", len(j), "customers")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: outputs
+          path: outputs/
