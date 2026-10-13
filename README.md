@@ -1,8 +1,5 @@
-# E-Commerce Customer Segmentation using Big Data
+# E-Commerce Customer Segmentation using Big Data – Big Data Analytics 
 
-**CCS334 – Big Data Analytics · Mini Project (Assignment Component II) · Team 5**
-Team: Harish S (814724104048) · Chittrasan K (814724104026)
-SDG 8 – Decent Work & Economic Growth · Level L2 · Dataset: UCI Online Retail
 
 Segments e-commerce customers by **Recency, Frequency, Monetary (RFM)** behaviour so a retailer can target
 champions, win back at-risk buyers and stop spending marketing money on lost ones.
