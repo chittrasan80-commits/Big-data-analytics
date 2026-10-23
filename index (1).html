@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>E-Commerce Customer Segmentation using Big Data – Big Data Analytics</title>
+<style>
+:root{--bg:#f7f8fb;--card:#fff;--text:#14213d;--muted:#5b6478;--line:#e2e6ee;--c1:#2563eb;--c2:#10b981;--c3:#f59e0b;--hero:#14213d;--herot:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1424;--card:#172038;--text:#e8ecf6;--muted:#9aa5bf;--line:#26314f;--hero:#0a0f1d;--herot:#fff}}
+:root[data-theme="dark"]{--bg:#0e1424;--card:#172038;--text:#e8ecf6;--muted:#9aa5bf;--line:#26314f;--hero:#0a0f1d;--herot:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.55}
+.hero{background:var(--hero);color:var(--herot);padding:56px 20px 48px;text-align:center}
+.hero small{letter-spacing:.08em;text-transform:uppercase;opacity:.7}
+.hero h1{margin:10px auto 12px;max-width:760px;font-size:clamp(1.6rem,4vw,2.4rem);line-height:1.2}
+.hero p{max-width:640px;margin:0 auto 22px;opacity:.85}
+.btn{display:inline-block;padding:10px 18px;border-radius:8px;background:var(--c1);color:#fff;text-decoration:none;font-weight:600;margin:4px}
+.btn.alt{background:transparent;border:1px solid rgba(255,255,255,.4)}
+main{max-width:980px;margin:0 auto;padding:28px 18px 60px}
+h2{margin:36px 0 12px;font-size:1.3rem}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-top:-34px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.kpi b{display:block;font-size:1.7rem}
+.kpi span{color:var(--muted);font-size:.9rem}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.bar{margin:10px 0}
+.bar .lab{display:flex;justify-content:space-between;font-size:.9rem;margin-bottom:3px}
+.track{height:14px;border-radius:7px;background:var(--line);overflow:hidden}
+.fill{height:100%;border-radius:7px;width:0;transition:width 1s ease}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:.92rem}
+th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:right}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--muted);font-weight:600}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;counter-reset:s}
+.step{position:relative;padding-top:34px}
+.step::before{counter-increment:s;content:counter(s);position:absolute;top:10px;left:14px;width:22px;height:22px;border-radius:50%;background:var(--c1);color:#fff;font-size:.8rem;display:flex;align-items:center;justify-content:center}
+.step b{display:block}.step span{color:var(--muted);font-size:.85rem}
+.tags span{display:inline-block;margin:3px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:.85rem}
+footer{text-align:center;color:var(--muted);font-size:.85rem;padding:24px 16px}
+a{color:var(--c1)}
+</style>
+</head>
+<body>
+<header class="hero">
+  <small>CCS334 · Big Data Analytics · Team 5 · SDG 8</small>
+  <h1>E-Commerce Customer Segmentation using Big Data</h1>
+  <p>We grouped 4,338 online-shop customers by how recently, how often and how much they buy, so a retailer can spend marketing money where it actually pays off.</p>
+  <a class="btn" href="https://github.com/chittrasan80-commits/Big-data-analytics" target="_blank" rel="noopener">View on GitHub</a>
+  <a class="btn alt" href="#results">See results</a>
+</header>
+
+<main>
+  <section class="kpis">
+    <div class="card kpi"><b>4,338</b><span>customers segmented</span></div>
+    <div class="card kpi"><b>3</b><span>segments found (KMeans)</span></div>
+    <div class="card kpi"><b>69.2%</b><span>of revenue from 18.5% of customers</span></div>
+    <div class="card kpi"><b>8.9M</b><span>total revenue analysed</span></div>
+  </section>
+
+  <h2 id="results">Results</h2>
+  <div class="grid2">
+    <div class="card"><b>Share of customers</b><div id="bars-cust"></div></div>
+    <div class="card"><b>Share of revenue</b><div id="bars-rev"></div></div>
+  </div>
+
+  <div class="card scroll" style="margin-top:14px">
+    <table>
+      <thead><tr><th>Segment</th><th>Customers</th><th>Avg recency (days)</th><th>Avg orders</th><th>Avg spend</th><th>Revenue</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+
+  <h2>What the retailer should do</h2>
+  <div class="grid2">
+    <div class="card"><b><span class="dot" style="background:var(--c1)"></span>Champions</b><p>Protect the revenue base with loyalty rewards and early access. Fewer than one in five customers bring in about 69% of sales.</p></div>
+    <div class="card"><b><span class="dot" style="background:var(--c2)"></span>Potential Loyalists</b><p>Bought recently but only about three times. Bundles, repeat-purchase offers and reminders can move them toward Champions.</p></div>
+    <div class="card"><b><span class="dot" style="background:var(--c3)"></span>Lost / Hibernating</b><p>The biggest group (42%) brings only 7% of revenue. Use low-cost win-back emails, not heavy discounts.</p></div>
+  </div>
+
+  <h2>How it works</h2>
+  <div class="steps">
+    <div class="card step"><b>Clean</b><span>Drop guest rows, cancellations and bad prices</span></div>
+    <div class="card step"><b>MapReduce / Hive</b><span>Build Recency, Frequency, Monetary per customer</span></div>
+    <div class="card step"><b>Transform</b><span>log1p and standardise skewed values</span></div>
+    <div class="card step"><b>KMeans</b><span>PySpark, k chosen by silhouette score</span></div>
+    <div class="card step"><b>Serve</b><span>Cassandra lookups and Power BI dashboards</span></div>
+  </div>
+
+  <h2>Tech stack</h2>
+  <div class="tags"><span>Hadoop / HDFS</span><span>MapReduce</span><span>Hive</span><span>Cassandra (NoSQL)</span><span>PySpark MLlib</span><span>Python</span><span>Power BI</span><span>Docker</span><span>GitHub Actions</span></div>
+
+  <h2>Dataset and team</h2>
+  <div class="card">
+    <p>UCI Online Retail: 541,909 transactions from a UK-based online gift retailer, December 2010 to December 2011. After removing guest checkouts, cancellations and invalid rows, 4,338 identified customers remain.</p>
+    <p><b>Team 5:</b> Harish S · Chittrasan K</p>
+  </div>
+</main>
+<footer>Mini Project, Assignment Component II · Department of Computer Science and Engineering</footer>
+
+<script>
+var data=[
+ {n:"Champions",c:801,r:17.9,o:13.1,s:7698.36,rev:6166382.57,col:"var(--c1)"},
+ {n:"Potential Loyalists",c:1697,r:45.0,o:3.3,s:1226.80,rev:2081874.29,col:"var(--c2)"},
+ {n:"Lost / Hibernating",c:1840,r:170.1,o:1.4,s:360.41,rev:663151.04,col:"var(--c3)"}
+];
+var tc=data.reduce(function(a,d){return a+d.c},0), tr=data.reduce(function(a,d){return a+d.rev},0);
+function fmt(x){return x.toLocaleString("en-US",{maximumFractionDigits:2})}
+function bars(id,key,total){
+  var el=document.getElementById(id), html="";
+  data.forEach(function(d){
+    var p=(d[key]/total*100);
+    html+='<div class="bar"><div class="lab"><span>'+d.n+'</span><span>'+p.toFixed(1)+'%</span></div><div class="track"><div class="fill" data-w="'+p+'" style="background:'+d.col+'"></div></div></div>';
+  });
+  el.innerHTML=html;
+}
+bars("bars-cust","c",tc); bars("bars-rev","rev",tr);
+document.getElementById("rows").innerHTML=data.map(function(d){
+  return '<tr><td><span class="dot" style="background:'+d.col+'"></span>'+d.n+'</td><td>'+fmt(d.c)+'</td><td>'+d.r+'</td><td>'+d.o+'</td><td>'+fmt(d.s)+'</td><td>'+fmt(d.rev)+'</td></tr>';
+}).join("");
+requestAnimationFrame(function(){setTimeout(function(){
+  document.querySelectorAll(".fill").forEach(function(f){f.style.width=f.dataset.w+"%"});
+},100)});
+</script>
+</body>
+</html>
