@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E-Commerce Customer Segmentation using Big Data</title>
+<style>
+:root{--bg:#f6f8f7;--surf:#fff;--ink:#14231f;--mute:#5b6b66;--line:#d9e2de;--c1:#0f766e;--c2:#c2410c;--c3:#1d4ed8;--c4:#7c3aed;--c5:#b45309}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0e1816;--surf:#15231f;--ink:#e6efec;--mute:#93a7a1;--line:#27403a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 Georgia,'Times New Roman',serif}
+h1,h2,h3,nav,button,select,label,th,.kpi b,.tag{font-family:'Trebuchet MS','Segoe UI',sans-serif}
+header{padding:56px 24px 32px;max-width:1000px;margin:auto}
+h1{font-size:clamp(1.9rem,5vw,3.2rem);line-height:1.1;margin:0 0 14px;letter-spacing:-.02em}
+header p{max-width:62ch;color:var(--mute);margin:0}
+nav{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);z-index:5}
+nav div{max-width:1000px;margin:auto;padding:10px 24px;display:flex;gap:20px;flex-wrap:wrap;font-size:.9rem}
+nav a{color:var(--ink);text-decoration:none}nav a:hover{text-decoration:underline}
+main{max-width:1000px;margin:auto;padding:0 24px 64px}
+section{padding:36px 0 8px}
+h2{font-size:1.5rem;margin:0 0 12px}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.kpi{border-left:4px solid var(--c1);padding:6px 14px;background:var(--surf)}
+.kpi b{display:block;font-size:1.6rem}.kpi span{color:var(--mute);font-size:.85rem}
+.box{background:var(--surf);border:1px solid var(--line);padding:18px;border-radius:6px;overflow-x:auto}
+.pipe{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch}
+.pipe div{flex:1 1 130px;border:1px solid var(--line);background:var(--surf);padding:10px;border-radius:6px;font-size:.85rem}
+.pipe b{display:block;font-family:'Trebuchet MS',sans-serif}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+select,button{font-size:.9rem;padding:7px 10px;border:1px solid var(--line);background:var(--surf);color:var(--ink);border-radius:5px;cursor:pointer}
+button:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--c3);outline-offset:2px}
+pre{background:#0f1f1b;color:#d7efe8;padding:16px;border-radius:6px;overflow-x:auto;font-size:.8rem;line-height:1.5}
+canvas{width:100%;height:auto;display:block}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+footer{text-align:center;color:var(--mute);padding:24px;font-size:.85rem;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<header>
+<h1>E-Commerce Customer Segmentation using Big Data</h1>
+<p>A Big Data Analytics project that groups online shoppers by Recency, Frequency and Monetary value (RFM) using K-Means clustering on Apache Spark, so marketing teams can target each group with the right offer.</p>
+</header>
+<nav><div><a href="#overview">Overview</a><a href="#pipeline">Pipeline</a><a href="#explorer">Explore segments</a><a href="#segments">Segment strategy</a><a href="#code">Spark code</a><a href="#run">Run on GitHub</a></div></nav>
+<main>
+
+<section id="overview"><h2>Overview</h2>
+<div class="grid">
+<div class="kpi"><b id="k1">–</b><span>customers analysed</span></div>
+<div class="kpi"><b id="k2">–</b><span>total revenue</span></div>
+<div class="kpi"><b>5</b><span>segments found</span></div>
+<div class="kpi"><b>K-Means</b><span>clustering on RFM</span></div>
+</div>
+<p>Data shown is a simulated sample of 600 customers generated in your browser to demonstrate the method. Replace it with your real dataset (for example the UCI Online Retail dataset) by running the Spark job below.</p>
+</section>
+
+<section id="pipeline"><h2>Big data pipeline</h2>
+<div class="pipe">
+<div><b>1. Ingest</b>Orders CSV or Parquet in HDFS / S3</div>
+<div><b>2. Clean</b>Remove nulls, cancellations, negative quantities</div>
+<div><b>3. Features</b>Recency, Frequency, Monetary per customer</div>
+<div><b>4. Scale</b>StandardScaler on log-transformed values</div>
+<div><b>5. Cluster</b>Spark MLlib K-Means, k chosen by silhouette</div>
+<div><b>6. Serve</b>Segment table and dashboard</div>
+</div></section>
+
+<section id="explorer"><h2>Explore segments</h2>
+<div class="box">
+<div class="row">
+<label>X axis <select id="xa"><option value="r">Recency (days)</option><option value="f" selected>Frequency (orders)</option><option value="m">Monetary (spend)</option></select></label>
+<label>Y axis <select id="ya"><option value="r">Recency (days)</option><option value="f">Frequency (orders)</option><option value="m" selected>Monetary (spend)</option></select></label>
+<button id="regen">Generate new sample</button>
+</div>
+<canvas id="cv" width="900" height="420" role="img" aria-label="Scatter plot of customers coloured by segment"></canvas>
+<div id="legend" class="row" style="margin-top:8px"></div>
+</div>
+<div class="box" style="margin-top:14px"><table id="tbl"></table></div>
+</section>
+
+<section id="segments"><h2>Segment strategy</h2>
+<div class="box"><table>
+<tr><th>Segment</th><th>Profile</th><th>Recommended action</th></tr>
+<tr><td><span class="dot" style="background:var(--c1)"></span>Champions</td><td>Bought recently, often, high spend</td><td>Early access, loyalty rewards, referral offers</td></tr>
+<tr><td><span class="dot" style="background:var(--c3)"></span>Loyal</td><td>Regular buyers, medium spend</td><td>Upsell, bundles, subscription offers</td></tr>
+<tr><td><span class="dot" style="background:var(--c4)"></span>New customers</td><td>Recent but few orders</td><td>Welcome series, second purchase discount</td></tr>
+<tr><td><span class="dot" style="background:var(--c5)"></span>At risk</td><td>Used to buy often, gone quiet</td><td>Win-back emails, personal recommendations</td></tr>
+<tr><td><span class="dot" style="background:var(--c2)"></span>Lost</td><td>Long inactive, low spend</td><td>Low-cost reactivation or stop spending</td></tr>
+</table></div></section>
+
+<section id="code"><h2>Spark code (PySpark)</h2>
+<pre>from pyspark.sql import SparkSession, functions as F
+from pyspark.ml.feature import VectorAssembler, StandardScaler
+from pyspark.ml.clustering import KMeans
+from pyspark.ml.evaluation import ClusteringEvaluator
+
+spark = SparkSession.builder.appName("CustomerSegmentation").getOrCreate()
+df = spark.read.csv("data/online_retail.csv", header=True, inferSchema=True)
+
+df = (df.dropna(subset=["CustomerID"])
+        .filter((F.col("Quantity") &gt; 0) &amp; (F.col("UnitPrice") &gt; 0))
+        .withColumn("Amount", F.col("Quantity") * F.col("UnitPrice")))
+
+ref = df.agg(F.max("InvoiceDate")).first()[0]
+rfm = (df.groupBy("CustomerID").agg(
+        F.datediff(F.lit(ref), F.max("InvoiceDate")).alias("Recency"),
+        F.countDistinct("InvoiceNo").alias("Frequency"),
+        F.sum("Amount").alias("Monetary")))
+
+vec = VectorAssembler(inputCols=["Recency","Frequency","Monetary"], outputCol="raw").transform(rfm)
+sc = StandardScaler(inputCol="raw", outputCol="features").fit(vec)
+data = sc.transform(vec)
+
+best = None
+for k in range(2, 9):
+    pred = KMeans(k=k, seed=42).fit(data).transform(data)
+    s = ClusteringEvaluator().evaluate(pred)
+    print(k, round(s, 3))
+
+model = KMeans(k=5, seed=42).fit(data)
+model.transform(data).select("CustomerID","Recency","Frequency","Monetary","prediction") \
+     .write.mode("overwrite").csv("output/segments", header=True)</pre></section>
+
+<section id="run"><h2>Run on GitHub Pages</h2>
+<div class="box"><ol>
+<li>Create a new repository on GitHub, for example <code>ecommerce-customer-segmentation</code>.</li>
+<li>Upload this <code>index.html</code> file to the root of the repository.</li>
+<li>Open <b>Settings → Pages</b>, set Source to <b>Deploy from a branch</b>, choose <b>main</b> and <b>/ (root)</b>, then Save.</li>
+<li>After a minute your site is live at <code>https://YOUR-USERNAME.github.io/ecommerce-customer-segmentation/</code>.</li>
+</ol>
+<p>To run it locally, double-click <code>index.html</code>. To run the Spark job, save the code above as <code>segmentation.py</code> and run <code>spark-submit segmentation.py</code>.</p></div></section>
+</main>
+<footer>Big Data Analytics mini project · Customer segmentation with RFM and K-Means</footer>
+
+<script>
+const COLORS=['#0f766e','#1d4ed8','#7c3aed','#b45309','#c2410c'];
+const NAMES=['Champions','Loyal','New customers','At risk','Lost'];
+// profile: recency mean, frequency mean, monetary mean, share
+const P=[[10,30,5000,.12],[40,15,2200,.2],[8,2,250,.2],[130,12,1800,.18],[260,2,150,.3]];
+let D=[];
+const rnd=()=>{let u=0;for(let i=0;i<4;i++)u+=Math.random();return (u-2)/Math.sqrt(1/3)};
+function gen(n=600){D=[];P.forEach((p,i)=>{const c=Math.round(n*p[3]);for(let j=0;j<c;j++){
+ D.push({s:i,r:Math.max(1,p[0]*(1+.25*rnd())),f:Math.max(1,Math.round(p[1]*(1+.25*rnd()))),m:Math.max(20,p[2]*(1+.3*rnd()))})}});
+ draw();stats()}
+const lab={r:'Recency (days)',f:'Frequency (orders)',m:'Monetary (spend)'};
+function draw(){
+ const cv=document.getElementById('cv'),x=cv.getContext('2d'),W=cv.width,H=cv.height,pad=50;
+ const a=xa.value,b=ya.value;x.clearRect(0,0,W,H);
+ const mx=Math.max(...D.map(d=>d[a]))*1.05,my=Math.max(...D.map(d=>d[b]))*1.05;
+ const st=getComputedStyle(document.body);x.strokeStyle=st.getPropertyValue('--line');x.fillStyle=st.getPropertyValue('--mute');x.font='12px sans-serif';
+ x.beginPath();x.moveTo(pad,10);x.lineTo(pad,H-pad);x.lineTo(W-10,H-pad);x.stroke();
+ x.fillText(lab[a],W/2-40,H-12);x.save();x.translate(14,H/2+40);x.rotate(-Math.PI/2);x.fillText(lab[b],0,0);x.restore();
+ for(let i=0;i<=4;i++){x.fillText(Math.round(mx*i/4),pad+(W-pad-10)*i/4-8,H-pad+16);x.fillText(Math.round(my*i/4),8,H-pad-(H-pad-10)*i/4+4)}
+ D.forEach(d=>{x.fillStyle=COLORS[d.s];x.globalAlpha=.7;x.beginPath();
+  x.arc(pad+(d[a]/mx)*(W-pad-10),H-pad-(d[b]/my)*(H-pad-10),4,0,7);x.fill()});x.globalAlpha=1;
+ legend.innerHTML=NAMES.map((n,i)=>`<span><span class="dot" style="background:${COLORS[i]}"></span>${n}</span>`).join('')}
+function stats(){
+ k1.textContent=D.length;k2.textContent='$'+Math.round(D.reduce((s,d)=>s+d.m,0)).toLocaleString();
+ let h='<tr><th>Segment</th><th>Customers</th><th>Avg recency</th><th>Avg frequency</th><th>Avg spend</th><th>Revenue share</th></tr>';
+ const tot=D.reduce((s,d)=>s+d.m,0);
+ NAMES.forEach((n,i)=>{const g=D.filter(d=>d.s==i),c=g.length||1,av=k=>g.reduce((s,d)=>s+d[k],0)/c;
+  h+=`<tr><td><span class="dot" style="background:${COLORS[i]}"></span>${n}</td><td>${g.length}</td><td>${av('r').toFixed(0)} days</td><td>${av('f').toFixed(1)}</td><td>$${av('m').toFixed(0)}</td><td>${(g.reduce((s,d)=>s+d.m,0)/tot*100).toFixed(1)}%</td></tr>`});
+ tbl.innerHTML=h}
+xa.onchange=ya.onchange=draw;regen.onclick=()=>gen();gen();
+</script>
+</body>
+</html>
